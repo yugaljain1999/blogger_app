@@ -1,0 +1,8 @@
+alembic
+fastapi
+uvicorn
+sqlalchemy
+pymysql
+passlib[bcrypt]
+pyjwt
+python-multipart
