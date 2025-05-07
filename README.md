@@ -8,6 +8,6 @@
 * Add routers to route specific API groups.
 * Add repository folder to define functions.
 
-## Todo
+## Deployment
 
-* Add password hashing while creating user.
+* Using Vercel.
