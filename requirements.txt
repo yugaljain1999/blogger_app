@@ -7,4 +7,4 @@ passlib==1.7.4
 bcrypt==3.2.0
 pyjwt
 python-multipart
-psycopg2
+psycopg2-binary
