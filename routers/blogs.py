@@ -41,7 +41,7 @@ async def create_blog(blog: BlogBase, db: db_dependency, current_user: UserBase 
 @router.get("/blogs/", status_code=status.HTTP_200_OK, response_model=List[ShowBlogBase])
 async def get_blogs(db: db_dependency, current_user: UserBase = Depends(get_current_user)):     
     # get all blogs
-    return blogs.get_blogs(db)
+    return blogs.get_blogs(db, current_user)
 
 # Get blog by id and user details
 @router.get("/blogs/{id}",status_code=status.HTTP_200_OK, response_model=BlogBase)

@@ -25,9 +25,9 @@ def create_blog(blog: BlogBase, db: db_dependency):
     return db_blog
 
 # Get users and blogs
-def get_blogs(db: db_dependency):
+def get_blogs(db: db_dependency, current_user):
     # get all blogs
-    blogs = db.query(models.Blog).all()
+    blogs = db.query(models.Blog).filter(models.Blog.user_id==current_user.id).all()
     return blogs
 
 # Get blog by id and user details
