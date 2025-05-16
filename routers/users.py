@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from fastapi import HTTPException
 from repository import users
 from schemas import BlogBase, UserBase, ShowBlogBase, ShowUserBase, User
+from oauth2 import get_current_user
 
 
 # Bind base models to engine
@@ -30,23 +31,28 @@ router = APIRouter(tags = ['users'])
 
 # Get users and blogs
 @router.get("/users/", status_code=status.HTTP_200_OK, response_model=List[ShowUserBase])
-async def get_users(db: db_dependency):
+async def get_users(db: db_dependency, current_user: models.User = Depends(get_current_user)):
     # get all blogs
     return users.get_users(db)
 
 # Create user
 # Make api routing - depends on db_dependency , status_code and response_model - format
 @router.post("/users/", status_code=status.HTTP_201_CREATED) # post request to users endpoint and create user
-async def create_user(user: User, db: db_dependency):
+async def create_user(user: User, db: db_dependency, current_user: models.User = Depends(get_current_user)):
     return users.create_user(user=user, db=db)
 
 # Get user by user id
 @router.get("/users/{user_id}", status_code=status.HTTP_200_OK, response_model=ShowUserBase)
-async def get_user(user_id: int, db: db_dependency):
+async def get_user(user_id: int, db: db_dependency, current_user: models.User = Depends(get_current_user)):
     # query db by id to get user details
     return users.get_user(user_id=user_id, db=db)
 
 # update user's phone number
 @router.put("/users/{id}", status_code=status.HTTP_201_CREATED, response_model=UserBase)
-async def put_user(id: int, user: UserBase, db: db_dependency):
-    return users.put_user(id, user, db)
+async def put_user(user: UserBase, db: db_dependency, current_user: models.User = Depends(get_current_user)):
+    return users.put_user(user, db, current_user)
+
+# delete user account after login
+@router.delete("/users/", status_code=status.HTTP_200_OK, response_model=UserBase)
+async def delete_user(db: db_dependency, current_user: models.User = Depends(get_current_user)):
+    return users.delete_user(db, current_user)

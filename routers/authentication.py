@@ -36,7 +36,7 @@ db_dependency = Annotated[Session, Depends(get_db)]
 router = APIRouter(tags = ['authentication'])
 
 
-
+# Login with email or username
 @router.post("/login", status_code=status.HTTP_200_OK)
 def login(db: db_dependency, request: OAuth2PasswordRequestForm = Depends()): # change request type Login to OauthRequestForm
     # Query db to match login credentials
@@ -50,6 +50,7 @@ def login(db: db_dependency, request: OAuth2PasswordRequestForm = Depends()): # 
     
     # Generate JWT token to access other routes
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub":user.email}, expires_delta = access_token_expires) # generate access token using user email
+    # Adding id attribute too to retrieve access token - 12/5
+    access_token = create_access_token(data={"sub":user.email, "id":user.id}, expires_delta = access_token_expires) # generate access token using user email
 
     return {"access_token":access_token,"token_type":"bearer"}

@@ -8,3 +8,4 @@ bcrypt==3.2.0
 pyjwt
 python-multipart
 psycopg2-binary
+redis

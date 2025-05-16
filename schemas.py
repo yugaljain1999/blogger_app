@@ -9,7 +9,7 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: str | None = None
-
+    id: int
 
 
 class Login(BaseModel):
@@ -25,6 +25,14 @@ class BlogBase(BaseModel):
 
     # create relationship with user to show user details for particular blog
     # creator: UserBase
+
+    class Config():
+        orm_mode = True
+
+class PutBlogBase(BaseModel):
+    author: str
+    title: str
+    body: str
 
     class Config():
         orm_mode = True

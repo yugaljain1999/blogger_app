@@ -1,7 +1,9 @@
 import jwt
 from jwt.exceptions import InvalidTokenError
+from fastapi import HTTPException
 from datetime import timedelta, datetime, timezone
 import schemas
+from redis_client import redis_client
 
 # to get a string like this run:
 # openssl rand -hex 32
@@ -28,10 +30,16 @@ def verify_token(token: str, credentials_exception):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms = [ALGORITHM])
         email = payload.get("sub")
+        id = payload.get("id")
+
+        # if user is deleted then check if it's id is stored in revoked database
+        if redis_client.exists(f"blacklist:{id}"):
+            raise HTTPException(status_code=401, detail="User access revoked")
 
         if email is None:
             raise credentials_exception
-        token_data = schemas.TokenData(email=email)
+        token_data = schemas.TokenData(email=email, id=id)
+        return token_data
     except InvalidTokenError:
         raise credentials_exception
         

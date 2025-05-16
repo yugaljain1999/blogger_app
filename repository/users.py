@@ -5,6 +5,10 @@ from db import sessionlocal, engine
 import models
 from schemas import BlogBase, UserBase, ShowBlogBase, ShowUserBase, User
 from hashing import Hash
+from oauth2 import get_current_user
+from datetime import timedelta
+
+from redis_client import redis_client
 
 # Connect to DB
 def get_db():
@@ -42,8 +46,9 @@ def get_user(user_id: int, db: db_dependency):
         return HTTPException(status_code=404, detail="User not found")
     return user
 
-def put_user(id: int, user: UserBase, db: db_dependency):
-    user_to_update = db.query(models.User).filter(models.User.id == id).first()
+def put_user(user: UserBase, db: db_dependency, current_user: models.User = Depends(get_current_user)):
+    user_to_update = db.query(models.User).filter(models.User.id == current_user.id).first()
+    print(user_to_update.id, user_to_update.email)
     if user_to_update is None:
         return HTTPException(status_code=404, detail="User not found to update")
     # get attributes to update
@@ -54,3 +59,16 @@ def put_user(id: int, user: UserBase, db: db_dependency):
     db.commit()
     db.refresh(user_to_update)
     return user_to_update
+
+def delete_user(db: db_dependency, current_user: models.User = Depends(get_current_user)):
+    user_to_delete = db.query(models.User).filter(models.User.id == current_user.id).first()
+    if user_to_delete is None:
+        return HTTPException(status_code = 404, detail = "User not found")
+    db.delete(user_to_delete)
+    db.commit()
+    # Set expiration time of access token to 0 seconds - to immediately not able to access authenticated functions
+
+    # setx value in redis db
+    redis_client.setex(f"blacklist:{current_user.id}", timedelta(minutes=30), "revoked")
+
+    return user_to_delete
